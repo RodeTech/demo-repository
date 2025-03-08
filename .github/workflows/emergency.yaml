@@ -24,22 +24,37 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ steps.app-token.outputs.token }}
-      
+          
+      - name: Get CODEOWNERS
+        id: codeowners
+        uses: actions/codeowners-action@v2.1
+      - name: out
+        shell: bash
+        run: |
+          echo "${{ steps.codeowners.outputs.owners }}"
+
+      - name: Check if PR Author is in CODEOWNERS
+        id: check-codeowner
+        run: |
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          CODEOWNERS="${{ steps.codeowners.outputs.owners }}"
+          if echo "$CODEOWNERS" | grep -wq "$PR_AUTHOR"; then
+            echo "✅ $PR_AUTHOR is a CODEOWNER. Proceeding with auto-merge."
+            echo "IS_CODEOWNER=true" >> $GITHUB_ENV
+          else
+            echo "⛔ ERROR: $PR_AUTHOR is NOT a CODEOWNER! Merge is blocked."
+            exit 1
+          fi
+          
       - name: Approve
+        if: env.IS_CODEOWNER == 'true'
         uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           
-      - id: automerge
-        name: automerge
-        uses: "pascalgn/automerge-action@v0.16.4"
-        env:
-          MERGE_LABELS: "emergency"
-          LOG: DEBUG
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          
       - name: Merge PR
         run: gh pr merge --admin --squash "$PR_URL"
+        if: env.IS_CODEOWNER == 'true'
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}

@@ -56,18 +56,37 @@ jobs:
           echo "Reviewers for PR #$PR_NUMBER:"
           echo "$REVIEWERS"
 
-      - name: (Optional) Fetch Team Members using GH CLI
+      - name: Get PR Reviewers
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          ORG_NAME: "your-org"
-          TEAM_SLUG: "your-team"
         run: |
-          echo "Fetching team members..."
-          TEAM_MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM_SLUG/members --jq '.[].login')
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
 
-          echo "Team Members:"
-          echo "$TEAM_MEMBERS"
+          echo "Fetching PR reviewers..."
+          REVIEWERS=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.requested_reviewers | map(.login) | join(", ")')
+          TEAM_REVIEWERS=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.requested_teams | map(.slug) | join(", ")')
 
+          echo "Individual Reviewers: ${REVIEWERS:-None}"
+          echo "Team Reviewers: ${TEAM_REVIEWERS:-None}"
+
+          echo "REVIEWERS_LIST=$REVIEWERS" >> $GITHUB_ENV
+          echo "TEAM_REVIEWERS_LIST=$TEAM_REVIEWERS" >> $GITHUB_ENV
+
+      - name: Fetch Team Members of Requested Teams
+        if: env.TEAM_REVIEWERS_LIST != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ORG_NAME: "RodeTech"
+        run: |
+          echo "Fetching team members for: $TEAM_REVIEWERS_LIST"
+
+          for TEAM in $TEAM_REVIEWERS_LIST; do
+            echo "Fetching members of team: $TEAM"
+            MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM/members --jq 'map(.login) | join(", ")')
+            echo "Members of $TEAM: ${MEMBERS:-None}"
+          done
+          
       - name: Check if PR Author is in CODEOWNERS
         id: check-codeowner
         run: |

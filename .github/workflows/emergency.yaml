@@ -38,15 +38,11 @@ jobs:
         uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363
         with:
           github-token: ${{ steps.app-token.outputs.token }}
-          
-  automerge:
-    runs-on: ubuntu-latest
-    steps:
       - id: automerge
         name: automerge
         uses: "pascalgn/automerge-action@v0.16.4"
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           MERGE_LABELS: "emergency"
           MERGE_REMOVE_LABELS: "emergency"
           MERGE_METHOD: "squash"

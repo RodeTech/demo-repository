@@ -25,14 +25,35 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           
-      - name: Get CODEOWNERS
-        id: codeowners
-        uses: SvanBoxel/codeowners-action@bcc0924ce24bcfa965e6c1d79b351f69e9218fc8
-        
-      - name: out
-        shell: bash
+      - name: Set up GitHub CLI
+        run: gh auth status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get PR Reviewers using GH CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "${{ steps.codeowners.outputs.owners }}"
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+
+          echo "Fetching PR reviewers..."
+          REVIEWERS=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.requested_reviewers[].login')
+
+          echo "Reviewers for PR #$PR_NUMBER:"
+          echo "$REVIEWERS"
+
+      - name: (Optional) Fetch Team Members using GH CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORG_NAME: "your-org"
+          TEAM_SLUG: "your-team"
+        run: |
+          echo "Fetching team members..."
+          TEAM_MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM_SLUG/members --jq '.[].login')
+
+          echo "Team Members:"
+          echo "$TEAM_MEMBERS"
 
       - name: Check if PR Author is in CODEOWNERS
         id: check-codeowner

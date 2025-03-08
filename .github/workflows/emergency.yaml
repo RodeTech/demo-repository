@@ -30,6 +30,19 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug PR API Response
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+      
+          echo "Fetching PR details..."
+          gh api repos/$REPO/pulls/$PR_NUMBER | tee pr_response.json
+
+          REVIEWERS=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.requested_reviewers | map(.login) | join(", ")')
+          echo "Reviewers: ${REVIEWERS:-None}"
+    
       - name: Get PR Reviewers using GH CLI
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

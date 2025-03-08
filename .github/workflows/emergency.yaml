@@ -34,6 +34,8 @@ jobs:
         name: automerge
         uses: "pascalgn/automerge-action@v0.16.4"
         env:
+          MERGE_LABELS: "emergency"
+          LOG: DEBUG
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           
       - name: Merge PR

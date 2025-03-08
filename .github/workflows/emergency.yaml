@@ -1,7 +1,7 @@
 name: Emergency review bypass
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - labeled
 
@@ -29,9 +29,6 @@ jobs:
           
   automerge:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
     steps:
       - id: automerge
         name: automerge

@@ -117,7 +117,7 @@ jobs:
         if: env.AUTHOR_IS_MEMBER == 'true'
         run: |
           echo "🚀 Attempting to auto-merge PR #$PR_NUMBER..."
-          gh pr merge $PR_NUMBER --merge --admin || echo "⚠️ Auto-merge failed. Check branch protections."
+          gh pr merge --admin --squash "$PR_URL" || echo "⚠️ Auto-merge failed. Check branch protections."
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}

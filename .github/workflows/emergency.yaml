@@ -80,35 +80,44 @@ jobs:
           ORG_NAME: "RodeTech"
         run: |
           echo "Fetching team members for: $TEAM_REVIEWERS_LIST"
+          ALL_MEMBERS=""
 
           for TEAM in $TEAM_REVIEWERS_LIST; do
             echo "Fetching members of team: $TEAM"
-            MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM/members --jq 'map(.login) | join(", ")')
+            MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM/members --jq 'map(.login) | join(" ")' || echo "Error: Could not fetch team members")
+
             echo "Members of $TEAM: ${MEMBERS:-None}"
+            ALL_MEMBERS="$ALL_MEMBERS $MEMBERS"
           done
+
+          echo "ALL_TEAM_MEMBERS=$ALL_MEMBERS" >> $GITHUB_ENV
           
       - name: Check if PR Author is in CODEOWNERS
         id: check-codeowner
         run: |
           PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-          CODEOWNERS="${{ steps.codeowners.outputs.owners }}"
-          if echo "$CODEOWNERS" | grep -wq "$PR_AUTHOR"; then
-            echo "✅ $PR_AUTHOR is a CODEOWNER. Proceeding with auto-merge."
-            echo "IS_CODEOWNER=true" >> $GITHUB_ENV
+          echo "Checking if PR Author ($PR_AUTHOR) is in the team..."
+
+          if echo "$ALL_TEAM_MEMBERS" | grep -wq "$PR_AUTHOR"; then
+            echo "✅ PR Author is a member of the team!"
+            echo "AUTHOR_IS_MEMBER=true" >> $GITHUB_ENV
           else
-            echo "⛔ ERROR: $PR_AUTHOR is NOT a CODEOWNER! Merge is blocked."
-            exit 1
+            echo "❌ PR Author is NOT a team member!"
+            echo "AUTHOR_IS_MEMBER=false" >> $GITHUB_ENV
+            exit 0  # Do NOT fail the workflow, just skip auto-merge
           fi
           
       - name: Approve
-        if: env.IS_CODEOWNER == 'true'
+        if: env.AUTHOR_IS_MEMBER == 'true'
         uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           
       - name: Merge PR
-        run: gh pr merge --admin --squash "$PR_URL"
-        if: env.IS_CODEOWNER == 'true'
+        if: env.AUTHOR_IS_MEMBER == 'true'
+        run: |
+          echo "🚀 Attempting to auto-merge PR #$PR_NUMBER..."
+          gh pr merge $PR_NUMBER --merge --admin || echo "⚠️ Auto-merge failed. Check branch protections."
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}

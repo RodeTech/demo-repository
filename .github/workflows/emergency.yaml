@@ -27,7 +27,8 @@ jobs:
           
       - name: Get CODEOWNERS
         id: codeowners
-        uses: actions/codeowners-action@bcc0924ce24bcfa965e6c1d79b351f69e9218fc8
+        uses: SvanBoxel/codeowners-action@bcc0924ce24bcfa965e6c1d79b351f69e9218fc8
+        
       - name: out
         shell: bash
         run: |

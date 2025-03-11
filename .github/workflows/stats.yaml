@@ -3,10 +3,12 @@ on:
   pull_request:
     types: [opened]
   workflow_dispatch:
+  
+permissions: write-all
 
 jobs:
   stats:
     runs-on: ubuntu-latest
     steps:
       - name: Run pull request stats
-        uses: flowwer-dev/pull-request-stats@main
+        uses: flowwer-dev/pull-request-stats@b1825f03f7f6887d96f428a4eb6039674d463ba4

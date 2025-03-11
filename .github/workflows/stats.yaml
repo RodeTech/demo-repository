@@ -20,7 +20,7 @@ jobs:
           TIMEZONE: "Europe/Athens"
           REPORT_PERIOD: "months:1"
           AGGREGATE_VALUE_METHODS: average
-          PERIOD_SPLIT_UNIT: none
+          PERIOD_SPLIT_UNIT: months
           ISSUE_TITLE: "Quarterly Report"
           TOP_LIST_AMOUNT: 5
           EXECUTION_OUTCOME: existing-issue

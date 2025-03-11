@@ -1,14 +1,13 @@
-name: PR Review Stats
+name: PR Stats
 on:
-  pull_request:
-    types: [opened]
-  workflow_dispatch:
-  
-permissions: write-all
-
+  workflow_dispatch: # Specify the event that triggers the action
+  # https://docs.github.com/ko/actions/using-workflows/events-that-trigger-workflows
 jobs:
-  stats:
+  pr-stats:
     runs-on: ubuntu-latest
     steps:
-      - name: Run pull request stats
-        uses: flowwer-dev/pull-request-stats@b1825f03f7f6887d96f428a4eb6039674d463ba4
+      - name: PR Stats
+        uses: "naver/pr-stats@v1.0.0" # Path to the action and the version to use
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Be sure to check the documentation for 'with'.

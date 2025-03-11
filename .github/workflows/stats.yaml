@@ -4,9 +4,7 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch:
   
-permissions:
-  contents: read
-  pull-requests: write
+permissions: write-all
   
 jobs:
   review-stats:
@@ -43,3 +41,6 @@ jobs:
 
       - name: Run pull request stats
         uses: flowwer-dev/pull-request-stats@main
+        with:
+          publishAs: DESCRIPTION
+          telemetry: false

@@ -24,6 +24,9 @@ jobs:
   create-report:
     name: "Create report"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: "Runs script for analytics"
         uses: AlexSim93/pull-request-analytics-action@1c87bb2a69668014452df3f54fb1ff55874eddab #v4.6.0

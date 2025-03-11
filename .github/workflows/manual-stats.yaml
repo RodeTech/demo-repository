@@ -41,3 +41,4 @@ jobs:
           REPORT_DATE_END: ${{ inputs.report_date_end }}
           PERIOD_SPLIT_UNIT: ${{ inputs.period_split_unit }}
           TOP_LIST_AMOUNT: 5
+          USE_CHARTS: true

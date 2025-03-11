@@ -21,8 +21,7 @@ jobs:
           REPORT_PERIOD: "months:1"
           AGGREGATE_VALUE_METHODS: average
           PERIOD_SPLIT_UNIT: months
-          ISSUE_TITLE: "Quarterly Report"
+          ISSUE_TITLE: "Pull requests report"
           TOP_LIST_AMOUNT: 5
           EXECUTION_OUTCOME: existing-issue
-          ISSUE_NUMBER: 45
           ALLOW_ANALYTICS: false

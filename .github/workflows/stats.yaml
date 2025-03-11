@@ -19,9 +19,7 @@ jobs:
           LABELS: "Report"
           TIMEZONE: "Europe/Athens"
           REPORT_PERIOD: "months:1"
-          AGGREGATE_VALUE_METHODS: average
+          AGGREGATE_VALUE_METHODS: percentile
           PERIOD_SPLIT_UNIT: months
-          ISSUE_TITLE: "Pull requests report"
           TOP_LIST_AMOUNT: 5
-          EXECUTION_OUTCOME: existing-issue
           ALLOW_ANALYTICS: false

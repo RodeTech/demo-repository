@@ -1,0 +1,40 @@
+name: "Manual PR Statistic Report"
+on:
+  workflow_dispatch:
+    inputs:
+      report_date_start:
+        description: "Report date start(d/MM/yyyy)"
+        required: false
+        default: "01/01/2025"
+      report_date_end:
+        description: "Report date end(d/MM/yyyy)"
+        required: false
+        default: "31/01/2025"
+      period_split_unit:
+        description: "Unit for time segmentation"
+        required: false
+        default: "months"
+        type: choice
+        options:
+          - years
+          - quarters
+          - months
+          - none
+jobs:
+  create-report:
+    name: "Create report"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Runs script for analytics"
+        uses: AlexSim93/pull-request-analytics-action@1c87bb2a69668014452df3f54fb1ff55874eddab #v4.6.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_OWNER_FOR_ISSUE: "inDriver"
+          GITHUB_REPO_FOR_ISSUE: "terraform-aws"
+          GITHUB_OWNERS_REPOS: "inDriver/terraform-aws"
+          LABELS: "Report"
+          TIMEZONE: "Europe/Athens"
+          REPORT_DATE_START: ${{ inputs.report_date_start }}
+          REPORT_DATE_END: ${{ inputs.report_date_end }}
+          PERIOD_SPLIT_UNIT: ${{ inputs.period_split_unit }}
+          TOP_LIST_AMOUNT: 5

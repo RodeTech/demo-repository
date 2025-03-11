@@ -23,5 +23,5 @@ jobs:
           ISSUE_TITLE: "Quarterly Report"
           TOP_LIST_AMOUNT: 5
           EXECUTION_OUTCOME: existing-issue
-          ISSUE_NUMBER: 999 # Set issue number or change EXECUTION_OUTCOME to new-issue
+          ISSUE_NUMBER: 45
           ALLOW_ANALYTICS: false

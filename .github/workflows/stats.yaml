@@ -1,11 +1,6 @@
 name: "PR Analytics"
 on:
   workflow_dispatch:
-    inputs:
-      report_date_start:
-        description: "Report date start(d/MM/yyyy)"
-      report_date_end:
-        description: "Report date end(d/MM/yyyy)"
 jobs:
   create-report:
     name: "Create report"

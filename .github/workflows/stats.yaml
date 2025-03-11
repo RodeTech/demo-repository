@@ -5,6 +5,9 @@ jobs:
   create-report:
     name: "Create report"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: "Run script for analytics"
         uses: AlexSim93/pull-request-analytics-action@v4
@@ -14,10 +17,8 @@ jobs:
           GITHUB_REPO_FOR_ISSUE: "demo-repository" # Make sure to specify the name of the repository where the issue will be created
           GITHUB_OWNERS_REPOS: "RodeTech/demo-repository" # Be sure to list the owner and repository name in the format owner/repo
           LABELS: "Report"
-          CORE_HOURS_START: "09:00"
-          CORE_HOURS_END: "20:00"
           TIMEZONE: "Europe/Athens"
-          REPORT_PERIOD: "months:3"
+          REPORT_PERIOD: "months:1"
           AGGREGATE_VALUE_METHODS: average
           PERIOD_SPLIT_UNIT: none
           ISSUE_TITLE: "Quarterly Report"

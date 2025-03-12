@@ -10,6 +10,6 @@ jobs:
       pull-requests: write
     steps:
       - name: Assignee to Reviewer
-        uses: pullreminders/assignee-to-reviewer-action@v1.0.4
+        uses: pullreminders/assignee-to-reviewer-action@v1.0.7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

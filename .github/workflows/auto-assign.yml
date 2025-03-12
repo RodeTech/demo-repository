@@ -1,15 +1,28 @@
-name: Assign reviewers based on assignees
+name: Sync Assignee and Reviewer
+
 on:
   pull_request:
-    types: [assigned, unassigned]
+    types: [assigned, review_requested]
 
 jobs:
-  assignee_to_reviewer:
+  sync_roles:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
+
     steps:
-      - name: Assignee to Reviewer
-        uses: pullreminders/assignee-to-reviewer-action@v1.0.7
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Sync Assignee to Reviewer
+        if: github.event_name == 'pull_request' && github.event.action == 'assigned'
+        run: |
+          ASSIGNEE="${{ github.event.pull_request.assignees[0].login }}"
+          gh pr review-request ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --add "$ASSIGNEE"
+
+      - name: Sync Reviewer to Assignee
+        if: github.event_name == 'pull_request' && github.event.action == 'review_requested'
+        run: |
+          REVIEWER="${{ github.event.pull_request.requested_reviewers[0].login }}"
+          gh issue edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --add-assignee "$REVIEWER"

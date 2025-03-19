@@ -31,21 +31,8 @@ jobs:
         run: gh auth status
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Debug PR API Response
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          REPO=${{ github.repository }}
-      
-          echo "Fetching PR details..."
-          gh api repos/$REPO/pulls/$PR_NUMBER | tee pr_response.json
-
-          REVIEWERS=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.requested_reviewers | map(.login) | join(", ")')
-          echo "Reviewers: ${REVIEWERS:-None}"
     
-      - name: Get PR Reviewers using GH CLI
+      - name: Get PR Reviewers
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
@@ -79,7 +66,7 @@ jobs:
         if: env.TEAM_REVIEWERS_LIST != ''
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          ORG_NAME: "RodeTech"
+          ORG_NAME: ${{ github.organization }}
         run: |
           echo "Fetching team members for: $TEAM_REVIEWERS_LIST"
           ALL_MEMBERS=""

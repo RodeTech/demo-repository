@@ -165,10 +165,10 @@ jobs:
           REPO=${{ github.repository }}
 
           echo "Fetching check runs for PR #$PR_NUMBER..."
-          FAILED_CHECKS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs | map(select(.conclusion != "success" and .conclusion != null)) | length')
+          #FAILED_CHECKS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs | map(select(.conclusion != "success" and .conclusion != null)) | length')
 
-          echo $FAILED_CHECKS
-          
+          #echo $FAILED_CHECKS
+
           # if [[ "$FAILED_CHECKS" -eq 0 ]]; then
           #   echo "✅ All checks are successful!"
           #   echo "ALL_CHECKS_PASS=true" >> $GITHUB_ENV

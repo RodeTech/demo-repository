@@ -175,7 +175,7 @@ jobs:
           else
             echo "❌ Some checks have failed!"
             echo "ALL_CHECKS_PASS=false" >> $GITHUB_ENV
-            exit 0  # Exit gracefully to prevent workflow failure
+            exit 0
 
       - name: Approve
         if: env.AUTHOR_IS_MEMBER == 'true'

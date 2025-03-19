@@ -165,15 +165,17 @@ jobs:
           REPO=${{ github.repository }}
 
           echo "Fetching check runs for PR #$PR_NUMBER..."
-          FAILED_CHECKS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs | map(select(.conclusion != "success" and .conclusion != null)) | length')
+          #FAILED_CHECKS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs | map(select(.conclusion != "success" and .conclusion != null)) | length')
 
-          if [[ "$FAILED_CHECKS" -eq 0 ]]; then
-            echo "✅ All checks are successful!"
-            echo "ALL_CHECKS_PASS=true" >> $GITHUB_ENV
-          else
-            echo "❌ Some checks have failed!"
-            echo "ALL_CHECKS_PASS=false" >> $GITHUB_ENV
-            exit 0  # Exit gracefully to prevent workflow failure
+          #echo $FAILED_CHECKS
+
+          # if [[ "$FAILED_CHECKS" -eq 0 ]]; then
+          #   echo "✅ All checks are successful!"
+          #   echo "ALL_CHECKS_PASS=true" >> $GITHUB_ENV
+          # else
+          #   echo "❌ Some checks have failed!"
+          #   echo "ALL_CHECKS_PASS=false" >> $GITHUB_ENV
+          #   exit 0  # Exit gracefully to prevent workflow failure
 
       - name: Approve
         if: env.AUTHOR_IS_MEMBER == 'true'

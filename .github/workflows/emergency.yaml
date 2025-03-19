@@ -104,7 +104,7 @@ jobs:
           else
             echo "❌ PR Author is NOT a team member!"
             echo "AUTHOR_IS_MEMBER=false" >> $GITHUB_ENV
-            exit 0  # Do NOT fail the workflow, just skip auto-merge
+            exit 0
           fi
 
       - name: Get PR Author
@@ -170,10 +170,7 @@ jobs:
           echo $FAILED_CHECKS
 
           if [[ "$FAILED_CHECKS" -eq 0 ]]; then
-            echo "✅ All checks are successful!"
-          else
-            echo "❌ Some checks have failed!"
-            exit 0
+            echo "✅ All checks are successful"
 
       - name: Approve
         if: env.AUTHOR_IS_MEMBER == 'true'

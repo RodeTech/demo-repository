@@ -135,24 +135,24 @@ jobs:
             exit 0  # Exit gracefully to prevent workflow failure
           fi
 
-      - name: Wait for All Checks to Complete
+      - name: Wait for All Checks to Complete (Excluding Current Job)
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           REPO=${{ github.repository }}
+          CURRENT_JOB_NAME="approve" # Make sure this matches the job name!
 
           echo "Waiting for all required checks to complete..."
           while true; do
-            IN_PROGRESS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs | map(select(.status == "in_progress" or .status == "queued")) | length')
+            IN_PROGRESS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs \
+              --jq '[.check_runs[] | select(.status == "in_progress" or .status == "queued") | select(.name != "'"$CURRENT_JOB_NAME"'")] | length')
 
             if [[ "$IN_PROGRESS" -eq 0 ]]; then
-              echo "✅ All checks have completed!"
+              echo "✅ All checks (excluding this job) have completed!"
               break
             else
               echo "⏳ Checks are still running... waiting 30 seconds before rechecking."
-              echo $IN_PROGRESS
-              echo "empty"
               sleep 30
             fi
           done

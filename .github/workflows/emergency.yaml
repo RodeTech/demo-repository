@@ -151,6 +151,8 @@ jobs:
               break
             else
               echo "⏳ Checks are still running... waiting 30 seconds before rechecking."
+              echo $IN_PROGRESS
+              echo "empty"
               sleep 30
             fi
           done
@@ -172,7 +174,7 @@ jobs:
             echo "❌ Some checks have failed!"
             echo "ALL_CHECKS_PASS=false" >> $GITHUB_ENV
             exit 0  # Exit gracefully to prevent workflow failure
-                
+
       - name: Approve
         if: env.AUTHOR_IS_MEMBER == 'true'
         uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363

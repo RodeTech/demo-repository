@@ -171,10 +171,8 @@ jobs:
 
           if [[ "$FAILED_CHECKS" -eq 0 ]]; then
             echo "✅ All checks are successful!"
-            echo "ALL_CHECKS_PASS=true" >> $GITHUB_ENV
           else
             echo "❌ Some checks have failed!"
-            echo "ALL_CHECKS_PASS=false" >> $GITHUB_ENV
             exit 0
 
       - name: Approve

@@ -170,7 +170,7 @@ jobs:
           echo $FAILED_CHECKS
 
           if [[ "$FAILED_CHECKS" -eq 0 ]]; then
-            echo "✅ All checks are successful"
+            echo "test"
 
       - name: Approve
         if: env.AUTHOR_IS_MEMBER == 'true'

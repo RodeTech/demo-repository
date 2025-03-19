@@ -66,7 +66,7 @@ jobs:
         if: env.TEAM_REVIEWERS_LIST != ''
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          ORG_NAME: ${{ github.organization }}
+          ORG_NAME: ${{ github.repository_owner }}
         run: |
           echo "Fetching team members for: $TEAM_REVIEWERS_LIST"
           ALL_MEMBERS=""
@@ -107,7 +107,7 @@ jobs:
       - name: Fetch Team Members of Specific Team
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          ORG_NAME: ${{ github.organization }}
+          ORG_NAME: ${{ github.repository_owner }}
           TEAM_NAME: "bot"
         run: |
           echo "Fetching members of team: $TEAM_NAME"

@@ -107,7 +107,7 @@ jobs:
       - name: Fetch Team Members of Specific Team
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          ORG_NAME: "RodeTech"
+          ORG_NAME: ${{ github.organization }}
           TEAM_NAME: "bot"
         run: |
           echo "Fetching members of team: $TEAM_NAME"

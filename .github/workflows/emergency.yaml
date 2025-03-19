@@ -106,18 +106,84 @@ jobs:
             echo "AUTHOR_IS_MEMBER=false" >> $GITHUB_ENV
             exit 0  # Do NOT fail the workflow, just skip auto-merge
           fi
-          
+
+      - name: Get PR Author
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          echo "PR Author: $PR_AUTHOR"
+          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
+
+      - name: Fetch Team Members of Specific Team
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ORG_NAME: "RodeTech"
+          TEAM_NAME: "bot"
+        run: |
+          echo "Fetching members of team: $TEAM_NAME"
+          TEAM_MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM_NAME/members --jq 'map(.login) | join(" ")' || echo "Error: Could not fetch team members")
+
+          echo "Members of $TEAM_NAME: ${TEAM_MEMBERS:-None}"
+
+          if echo "$TEAM_MEMBERS" | grep -wq "$PR_AUTHOR"; then
+            echo "✅ PR Author is a member of $TEAM_NAME!"
+            echo "AUTHOR_IS_MEMBER=true" >> $GITHUB_ENV
+          else
+            echo "❌ PR Author is NOT a member of $TEAM_NAME!"
+            echo "AUTHOR_IS_MEMBER=false" >> $GITHUB_ENV
+            exit 0  # Exit gracefully to prevent workflow failure
+          fi
+
+      - name: Wait for All Checks to Complete
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+
+          echo "Waiting for all required checks to complete..."
+          while true; do
+            IN_PROGRESS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs | map(select(.status == "in_progress" or .status == "queued")) | length')
+
+            if [[ "$IN_PROGRESS" -eq 0 ]]; then
+              echo "✅ All checks have completed!"
+              break
+            else
+              echo "⏳ Checks are still running... waiting 30 seconds before rechecking."
+              sleep 30
+            fi
+          done
+
+      - name: Verify All Checks Passed
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          REPO=${{ github.repository }}
+
+          echo "Fetching check runs for PR #$PR_NUMBER..."
+          FAILED_CHECKS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs | map(select(.conclusion != "success" and .conclusion != null)) | length')
+
+          if [[ "$FAILED_CHECKS" -eq 0 ]]; then
+            echo "✅ All checks are successful!"
+            echo "ALL_CHECKS_PASS=true" >> $GITHUB_ENV
+          else
+            echo "❌ Some checks have failed!"
+            echo "ALL_CHECKS_PASS=false" >> $GITHUB_ENV
+            exit 0  # Exit gracefully to prevent workflow failure
+                
       - name: Approve
         if: env.AUTHOR_IS_MEMBER == 'true'
         uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           
-      - name: Merge PR
-        if: env.AUTHOR_IS_MEMBER == 'true'
-        run: |
-          echo "🚀 Attempting to auto-merge PR #$PR_NUMBER..."
-          gh pr merge --admin --squash "$PR_URL" || echo "⚠️ Auto-merge failed. Check branch protections."
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      # - name: Merge PR
+      #   if: env.AUTHOR_IS_MEMBER == 'true'
+      #   run: |
+      #     echo "🚀 Attempting to auto-merge PR #$PR_NUMBER..."
+      #     gh pr merge --admin --squash "$PR_URL" || echo "⚠️ Auto-merge failed. Check branch protections."
+      #   env:
+      #     PR_URL: ${{ github.event.pull_request.html_url }}
+      #     GH_TOKEN: ${{ steps.app-token.outputs.token }}

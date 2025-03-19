@@ -130,12 +130,12 @@ jobs:
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           REPO=${{ github.repository }}
-          CURRENT_JOB_NAME="Approve" # Make sure this matches the job name!
+          CURRENT_JOB_NAME=${{ github.job }}
 
           echo "Waiting for all required checks to complete..."
           while true; do
             IN_PROGRESS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs \
-              --jq '[.check_runs[] | select(.status == "in_progress" or .status == "queued") | select(.name != "'"$CURRENT_JOB_NAME"'")] | length')
+              --jq '[.check_runs[] | select(.status == "in_progress" or .status == "queued") | select(.id != "'"$CURRENT_JOB_NAME"'")] | length')
 
             if [[ "$IN_PROGRESS" -eq 0 ]]; then
               echo "✅ All checks (excluding this job) have completed!"

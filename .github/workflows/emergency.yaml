@@ -130,7 +130,7 @@ jobs:
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           REPO=${{ github.repository }}
-          CURRENT_JOB_NAME=${{ github.job }}
+          CURRENT_JOB_NAME=${{ github.run_id }}
 
           echo "Waiting for all required checks to complete..."
           while true; do

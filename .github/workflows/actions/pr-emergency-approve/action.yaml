@@ -9,15 +9,14 @@ inputs:
   GHAPP_SSH_KEY:
     required: true
 
-env:
-  PR_NUMBER: ${{ github.event.pull_request.number }}
-  REPO: ${{ github.repository }}
-  ORG_NAME: ${{ github.repository_owner }}
-  PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-  RUN_ID: ${{ github.run_id }}
-
 runs:
   using: composite
+  env:
+    PR_NUMBER: ${{ github.event.pull_request.number }}
+    REPO: ${{ github.repository }}
+    ORG_NAME: ${{ github.repository_owner }}
+    PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+    RUN_ID: ${{ github.run_id }}
   steps:
 
     - name: Get GitHub App token

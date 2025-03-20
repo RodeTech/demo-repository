@@ -8,16 +8,6 @@ inputs:
     required: true
   GHAPP_SSH_KEY:
     required: true
-
-env:
-  PR_NUMBER: ${{ github.event.pull_request.number }}
-  REPO: ${{ github.repository }}
-  ORG_NAME: ${{ github.repository_owner }}
-  PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-
-defaults:
-  run:
-    shell: bash
     
 runs:
   using: composite
@@ -31,6 +21,7 @@ runs:
         private-key: ${{ secrets.GHAPP_SSH_KEY }}
           
     - name: Get PR Reviewers
+      shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
@@ -47,6 +38,7 @@ runs:
         echo "TEAM_REVIEWERS_LIST=$TEAM_REVIEWERS" >> $GITHUB_ENV
 
     - name: Fetch Team Members of Requested Teams
+      shell: bash
       if: env.TEAM_REVIEWERS_LIST != ''
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -64,6 +56,7 @@ runs:
         echo "ALL_TEAM_MEMBERS=$ALL_MEMBERS" >> $GITHUB_ENV
           
     - name: Check if PR Author is in CODEOWNERS
+      shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
@@ -79,6 +72,7 @@ runs:
         fi
 
     - name: Fetch Team Members of Specific Team
+      shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
         TEAM_NAME: ${{ inputs.bypass_team }}
@@ -98,6 +92,7 @@ runs:
         fi
 
     - name: Wait for All Checks to Complete (Excluding Current Job)
+      shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
@@ -121,6 +116,7 @@ runs:
         done
 
     - name: Verify All Checks Passed
+      shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |

@@ -20,6 +20,23 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: Read the comment template
+        id: read_comment
+        run: |
+          COMMENT_TEXT=$(cat ./.github/templates/template-rules.md)
+          echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
+          echo "$COMMENT_TEXT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Add a comment with the actor's username
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            👋 **Hello @${{ github.actor }}!**
+
+            ${{ env.COMMENT_BODY }}
+
       - name: Find Comment
         uses: peter-evans/find-comment@v3
         id: fc-sla

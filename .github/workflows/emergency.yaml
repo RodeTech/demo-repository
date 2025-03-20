@@ -15,171 +15,22 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.label.name == 'emergency'
     steps:
-    
-      - uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: 1184072
-          private-key: ${{ secrets.MERGEMATE_KEY }}
-          
+
       - name: Checkout branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: ./.github/workflows/actions/pr-emergency-approve
+        secrets:
+          GHAPP_ID: 1184072
+          GHAPP_SSH_KEY: ${{ secrets.MERGEMATE_KEY }}
         with:
-          token: ${{ steps.app-token.outputs.token }}
-          
-      - name: Set up GitHub CLI
-        run: gh auth status
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-    
-      - name: Get PR Reviewers
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          REPO=${{ github.repository }}
-
-          echo "Fetching PR reviewers..."
-          REVIEWERS=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.requested_reviewers[].login')
-
-          echo "Reviewers for PR #$PR_NUMBER:"
-          echo "$REVIEWERS"
-
-      - name: Get PR Reviewers
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          REPO=${{ github.repository }}
-
-          echo "Fetching PR reviewers..."
-          REVIEWERS=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.requested_reviewers | map(.login) | join(", ")')
-          TEAM_REVIEWERS=$(gh api repos/$REPO/pulls/$PR_NUMBER --jq '.requested_teams | map(.slug) | join(", ")')
-
-          echo "Individual Reviewers: ${REVIEWERS:-None}"
-          echo "Team Reviewers: ${TEAM_REVIEWERS:-None}"
-
-          echo "REVIEWERS_LIST=$REVIEWERS" >> $GITHUB_ENV
-          echo "TEAM_REVIEWERS_LIST=$TEAM_REVIEWERS" >> $GITHUB_ENV
-
-      - name: Fetch Team Members of Requested Teams
-        if: env.TEAM_REVIEWERS_LIST != ''
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          ORG_NAME: ${{ github.repository_owner }}
-        run: |
-          echo "Fetching team members for: $TEAM_REVIEWERS_LIST"
-          ALL_MEMBERS=""
-
-          for TEAM in $TEAM_REVIEWERS_LIST; do
-            echo "Fetching members of team: $TEAM"
-            MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM/members --jq 'map(.login) | join(" ")' || echo "Error: Could not fetch team members")
-
-            echo "Members of $TEAM: ${MEMBERS:-None}"
-            ALL_MEMBERS="$ALL_MEMBERS $MEMBERS"
-          done
-
-          echo "ALL_TEAM_MEMBERS=$ALL_MEMBERS" >> $GITHUB_ENV
-          
-      - name: Check if PR Author is in CODEOWNERS
-        id: check-codeowner
-        run: |
-          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-          echo "Checking if PR Author ($PR_AUTHOR) is in the team..."
-
-          if echo "$ALL_TEAM_MEMBERS" | grep -wq "$PR_AUTHOR"; then
-            echo "✅ PR Author is a member of the team!"
-            echo "AUTHOR_IS_MEMBER=true" >> $GITHUB_ENV
-          else
-            echo "❌ PR Author is NOT a team member!"
-            echo "AUTHOR_IS_MEMBER=false" >> $GITHUB_ENV
-            exit 0
-          fi
-
-      - name: Get PR Author
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-          echo "PR Author: $PR_AUTHOR"
-          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
-
-      - name: Fetch Team Members of Specific Team
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          ORG_NAME: ${{ github.repository_owner }}
-          TEAM_NAME: "bot"
-        run: |
-          echo "Fetching members of team: $TEAM_NAME"
-          TEAM_MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM_NAME/members --jq 'map(.login) | join(" ")' || echo "Error: Could not fetch team members")
-
-          echo "Members of $TEAM_NAME: ${TEAM_MEMBERS:-None}"
-
-          if echo "$TEAM_MEMBERS" | grep -wq "$PR_AUTHOR"; then
-            echo "✅ PR Author is a member of $TEAM_NAME!"
-            echo "AUTHOR_IS_MEMBER=true" >> $GITHUB_ENV
-          else
-            echo "❌ PR Author is NOT a member of $TEAM_NAME!"
-            echo "AUTHOR_IS_MEMBER=false" >> $GITHUB_ENV
-            exit 0  # Exit gracefully to prevent workflow failure
-          fi
-
-      - name: Wait for All Checks to Complete (Excluding Current Job)
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          REPO=${{ github.repository }}
-          RUN_ID=${{ github.run_id }}
-
-          # Fetch current job ID
-          CURRENT_JOB_ID=$(gh api repos/$REPO/actions/runs/$RUN_ID/jobs --jq '.jobs[] | .id')
-
-          echo "Current Job ID: $CURRENT_JOB_ID"
-
-          echo "Waiting for all required checks to complete..."
-          while true; do
-            IN_PROGRESS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs \
-              --jq '[.check_runs[] | select(.status == "in_progress" or .status == "queued") | select(.id != '"$CURRENT_JOB_ID"')] | length')
-
-            if [[ "$IN_PROGRESS" -eq 0 ]]; then
-              echo "✅ All checks (excluding this job) have completed!"
-              break
-            else
-              echo "⏳ Checks are still running... waiting 30 seconds before rechecking."
-              sleep 30
-            fi
-          done
-
-      - name: Verify All Checks Passed
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          REPO=${{ github.repository }}
-
-          echo "Fetching check runs for PR #$PR_NUMBER..."
-          FAILED_CHECKS=$(gh api repos/$REPO/commits/${{ github.event.pull_request.head.sha }}/check-runs --jq '.check_runs | map(select(.conclusion != "success" and .conclusion != null)) | length')
-
-          echo $FAILED_CHECKS
-
-          if [[ "$FAILED_CHECKS" -eq 0 ]]; then
-            echo "✅ All checks are successful!"
-          else
-            echo "❌ Some checks have failed!"
-            exit 0
-          fi
-
-      - name: Approve
-        if: env.AUTHOR_IS_MEMBER == 'true'
-        uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363
-        with:
-          github-token: ${{ steps.app-token.outputs.token }}
-          
-      - name: Merge PR
-        if: env.AUTHOR_IS_MEMBER == 'true'
-        run: |
-          echo "🚀 Attempting to auto-merge PR #$PR_NUMBER..."
-          gh pr merge --admin --squash "$PR_URL" || echo "⚠️ Auto-merge failed. Check branch protections."
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          bypass_team: bot
+      
+      # - name: Merge PR
+      #   if: env.AUTHOR_IS_MEMBER == 'true'
+      #   run: |
+      #     echo "🚀 Attempting to auto-merge PR #$PR_NUMBER..."
+      #     gh pr merge --admin --squash "$PR_URL" || echo "⚠️ Auto-merge failed. Check branch protections."
+      #   env:
+      #     PR_URL: ${{ github.event.pull_request.html_url }}
+      #     GH_TOKEN: ${{ steps.app-token.outputs.token }}

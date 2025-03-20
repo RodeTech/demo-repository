@@ -17,8 +17,8 @@ runs:
       uses: actions/create-github-app-token@v1
       id: app-token
       with:
-        app-id: ${{ secrets.GHAPP_ID }}
-        private-key: ${{ secrets.GHAPP_SSH_KEY }}
+        app-id: ${{ inputs.GHAPP_ID }}
+        private-key: ${{ inputs.GHAPP_SSH_KEY }}
           
     - name: Get PR Reviewers
       shell: bash

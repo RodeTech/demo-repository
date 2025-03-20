@@ -5,7 +5,7 @@ on:
     types: [created]
 
 env:
-  PR_NUMBER: ${{ github.event.pull_request.number }}
+  PR_NUMBER: ${{ github.event.number }}
   REPO: ${{ github.repository }}
 
 jobs:

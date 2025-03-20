@@ -20,11 +20,10 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - uses: ./.github/workflows/actions/pr-emergency-approve
-        secrets:
-          GHAPP_ID: 1184072
-          GHAPP_SSH_KEY: ${{ secrets.MERGEMATE_KEY }}
         with:
           bypass_team: bot
+          GHAPP_ID: 1184072
+          GHAPP_SSH_KEY: ${{ secrets.MERGEMATE_KEY }}
       
       # - name: Merge PR
       #   if: env.AUTHOR_IS_MEMBER == 'true'

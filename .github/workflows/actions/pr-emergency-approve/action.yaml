@@ -4,8 +4,6 @@ inputs:
   bypass_team:
     required: false
     default: main
-
-secrets:
   GHAPP_ID:
     required: true
   GHAPP_SSH_KEY:

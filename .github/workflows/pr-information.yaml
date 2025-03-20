@@ -30,9 +30,9 @@ jobs:
 
       - name: Render SLA template
         run: |
-          COMMENT_TEXT=$(cat ./.github/templates/template-rules.md)
-          echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
-          echo "$COMMENT_TEXT" >> $GITHUB_ENV
+          RULES_TEXT=$(cat ./.github/templates/template-rules.md)
+          echo "RULES_BODY<<EOF" >> $GITHUB_ENV
+          echo "$RULES_TEXT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Create comment with agreements 
@@ -43,7 +43,7 @@ jobs:
           body: |
             👋 **Hello @${{ github.actor }}!**
 
-            $COMMENT_BODY
+            ${{ env.RULES_BODY }}
           edit-mode: replace
 
       - name: Find Comment

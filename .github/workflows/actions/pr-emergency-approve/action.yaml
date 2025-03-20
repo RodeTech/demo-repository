@@ -11,12 +11,6 @@ inputs:
 
 runs:
   using: composite
-  env:
-    PR_NUMBER: ${{ github.event.pull_request.number }}
-    REPO: ${{ github.repository }}
-    ORG_NAME: ${{ github.repository_owner }}
-    PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-    RUN_ID: ${{ github.run_id }}
   steps:
 
     - name: Get GitHub App token
@@ -25,7 +19,18 @@ runs:
       with:
         app-id: ${{ inputs.GHAPP_ID }}
         private-key: ${{ inputs.GHAPP_SSH_KEY }}
-          
+
+    - name: Get PR Reviewers
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      run: |
+        echo "AUTHOR_IS_MEMBER=false" >> $GITHUB_ENV
+        echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+        echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+        echo "ORG_NAME=${{ github.repository_owner }}" >> $GITHUB_ENV
+        echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+        echo "RUN_ID=${{ github.run_id }}" >> $GITHUB_ENV
     - name: Get PR Reviewers
       shell: bash
       env:

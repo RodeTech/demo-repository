@@ -31,7 +31,9 @@ jobs:
       - name: Render SLA template
         run: |
           COMMENT_TEXT=$(cat ./.github/templates/template-rules.md)
+          echo "COMMENT_BODY<<EOF" >> $GITHUB_ENV
           echo "$COMMENT_TEXT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Create comment with agreements 
         uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 #v4.0.0
@@ -40,7 +42,8 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             👋 **Hello @${{ github.actor }}!**
-            $COMMENT_TEXT
+
+            $COMMENT_BODY
           edit-mode: replace
 
       - name: Find Comment

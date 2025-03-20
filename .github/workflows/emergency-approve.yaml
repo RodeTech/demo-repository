@@ -38,8 +38,8 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo "Checking approvals for PR #${{ env.PR_NUMBER }}..."
-          if gh pr view ${{ env.PR_NUMBER }} --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == "mergem8")] | length' | grep -qw "1"; then
+          echo "Checking approvals for PR: PR_HEAD_REF..."
+          if gh pr view $PR_HEAD_REF --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == "mergem8")] | length' | grep -qw "1"; then
             echo "✅ PR is approved by the bot."
             echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
           else

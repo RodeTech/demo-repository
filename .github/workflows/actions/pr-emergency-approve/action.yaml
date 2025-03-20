@@ -85,13 +85,15 @@ runs:
 
         if [[ "$FAILED_CHECKS" -eq 0 ]]; then
           echo "✅ All checks are successful!"
+          echo "ALL_CHECKS_PASSED=true" >> $GITHUB_ENV
         else
           echo "❌ Some checks have failed!"
+          echo "ALL_CHECKS_PASSED=false" >> $GITHUB_ENV
           exit 0
         fi
 
     - name: Approve
-      if: env.AUTHOR_IS_BYPASS_MEMBER == 'true'
+      if: env.AUTHOR_IS_BYPASS_MEMBER == 'true' && env.ALL_CHECKS_PASSED == 'true'
       uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363
       with:
         github-token: ${{ steps.app-token.outputs.token }}

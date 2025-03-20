@@ -14,6 +14,7 @@ env:
   REPO: ${{ github.repository }}
   ORG_NAME: ${{ github.repository_owner }}
   PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+  RUN_ID: ${{ github.run_id }}
 
 jobs:
   approve:
@@ -25,7 +26,8 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - uses: ./.github/workflows/actions/pr-emergency-approve
+      - name: Emergency Approve
+        uses: ./.github/workflows/actions/pr-emergency-approve
         with:
           bypass_team: bot
           GHAPP_ID: 1184072

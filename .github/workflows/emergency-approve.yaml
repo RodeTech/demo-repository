@@ -1,0 +1,48 @@
+name: Auto Merge on "merge me" Comment
+
+on:
+  issue_comment:
+    types: [created]
+
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  REPO: ${{ github.repository }}
+
+jobs:
+  auto-merge:
+    name: Auto Merge PR
+    runs-on: ubuntu-latest
+    if: | 
+      github.event.issue.pull_request && 
+      github.event.comment.body == 'merge me' &&
+      github.event.label.name == 'emergency'
+    steps:
+
+      - name: Get GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: 1184072
+          private-key: ${{ secrets.MERGEMATE_KEY }}
+
+      - name: Check PR Approval by Bot
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo "Checking approvals for PR #${{ env.PR_NUMBER }}..."
+          if gh pr view ${{ env.PR_NUMBER }} --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == "mergem8[bot]")] | length' | grep -qw "1"; then
+            echo "✅ PR is approved by the bot."
+            echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
+          else
+            echo "❌ PR is NOT approved by the bot. Exiting."
+            exit 0
+          fi
+
+      - name: Merge the PR
+        if: env.APPROVED_BY_BOT == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          echo "Merging PR #${{ env.PR_NUMBER }}..."
+          gh pr merge --admin --squash --delete-branch ${{ env.PR_NUMBER }} || echo "⚠️ Auto-merge failed. Check branch protections."
+          echo "✅ PR #${{ env.PR_NUMBER }} merged successfully!"

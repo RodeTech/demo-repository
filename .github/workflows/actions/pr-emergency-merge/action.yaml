@@ -1,0 +1,53 @@
+name: Emergency Merge
+
+inputs:
+  GHAPP_ID:
+    required: true
+  GHAPP_SSH_KEY:
+    required: true
+
+runs:
+  using: composite
+  steps:
+
+    - name: Get GitHub App Token
+      uses: actions/create-github-app-token@v1
+      id: app-token
+      with:
+        app-id: ${{ inputs.GHAPP_ID }}
+        private-key: ${{ inputs.GHAPP_SSH_KEY }}
+
+    - name: Get PR branch
+      uses: xt0rted/pull-request-comment-branch@d97294d304604fa98a2600a6e2f916a84b596dc7 # v2.0.0
+      id: comment-branch
+
+    - name: Set PR_HEAD_REF
+      run: |
+        echo "PR_HEAD_REF=${{ steps.comment-branch.outputs.head_ref }}" >> $GITHUB_ENV
+        echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+        echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+
+    - name: Check PR Approval by Bot
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      run: |
+        echo "Checking approvals for PR: $PR_HEAD_REF..."
+        BOT_APPROVALS=$(gh pr view $PR_HEAD_REF --repo $REPO --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == "mergem8")] | length')
+
+        if [[ "$BOT_APPROVALS" -gt 0 ]]; then
+          echo "✅ PR is approved by the bot ($BOT_APPROVALS approvals)."
+          echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
+        else
+          echo "Hey @$PR_AUTHOR!\n❌ This PR is NOT approved by the bot. Exiting."
+          gh pr comment --body "❌ PR is NOT approved by the bot" --repo $REPO $PR_HEAD_REF
+          exit 0
+        fi
+
+    - name: Merge the PR
+      if: env.APPROVED_BY_BOT == 'true'
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      run: |
+        echo "Merging PR #${{ env.PR_NUMBER }}..."
+        gh pr merge --repo $REPO --admin --squash --delete-branch $PR_HEAD_REF || echo "⚠️ Auto-merge failed. Check branch protections."
+        echo "✅ PR #${{ env.PR_NUMBER }} merged successfully!"

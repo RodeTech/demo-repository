@@ -1,19 +1,21 @@
-name: Emergency review bypass
+name: Emergency Merge
 
 on:
-  pull_request_target:
+  issue_comment:
     types:
-      - labeled
+      - created
 
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
-  approve:
-    name: Approve
+  auto-merge:
+    name: Auto Merge PR
     runs-on: ubuntu-latest
-    if: github.event.label.name == 'emergency'
+    if: |
+      github.event.issue.pull_request && 
+      github.event.comment.body == 'merge me'
     steps:
 
       - name: Checkout branch
@@ -22,8 +24,7 @@ jobs:
           ref: main
 
       - name: Emergency Approve
-        uses: ./.github/workflows/actions/pr-emergency-approve
+        uses: ./.github/workflows/actions/pr-emergency-merge
         with:
-          BYPASS_TEAM: bot
           GHAPP_ID: 1184072
           GHAPP_SSH_KEY: ${{ secrets.MERGEMATE_KEY }}

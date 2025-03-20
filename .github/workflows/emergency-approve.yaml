@@ -57,5 +57,5 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           echo "Merging PR #${{ env.PR_NUMBER }}..."
-          gh pr merge --repo $REPO --admin --squash --delete-branch $PR_HEAD_REF|| echo "⚠️ Auto-merge failed. Check branch protections."
+          gh pr merge --repo $REPO --admin --squash --delete-branch $PR_HEAD_REF || echo "⚠️ Auto-merge failed. Check branch protections."
           echo "✅ PR #${{ env.PR_NUMBER }} merged successfully!"

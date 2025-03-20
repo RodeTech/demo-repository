@@ -1,0 +1,3 @@
+👋 **Hello @{{ .user }}!**
+
+Thank you for your contribution! Your PR is greatly appreciated. Our team will [review it soon](https://github.com/inDriver/terraform-aws/blob/master/CONTRIBUTING.md#-pull-request-review-process). Please ensure it follows the [contribution guidelines](https://github.com/inDriver/terraform-aws/blob/master/CONTRIBUTING.md).

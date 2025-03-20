@@ -22,12 +22,14 @@ runs:
       id: comment-branch
 
     - name: Set PR_HEAD_REF
+      shell: bash
       run: |
         echo "PR_HEAD_REF=${{ steps.comment-branch.outputs.head_ref }}" >> $GITHUB_ENV
         echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
         echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
 
     - name: Check PR Approval by Bot
+      shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
@@ -44,6 +46,7 @@ runs:
         fi
 
     - name: Merge the PR
+      shell: bash
       if: env.APPROVED_BY_BOT == 'true'
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}

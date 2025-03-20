@@ -47,6 +47,7 @@ jobs:
             echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
           else
             echo "❌ PR is NOT approved by the bot. Exiting."
+            gh pr comment --body "❌ PR is NOT approved by the bot" --repo $REPO $PR_HEAD_REF
             exit 0
           fi
 

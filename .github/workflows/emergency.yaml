@@ -9,13 +9,6 @@ permissions:
   contents: read
   pull-requests: write
 
-env:
-  PR_NUMBER: ${{ github.event.pull_request.number }}
-  REPO: ${{ github.repository }}
-  ORG_NAME: ${{ github.repository_owner }}
-  PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-  RUN_ID: ${{ github.run_id }}
-
 jobs:
   approve:
     name: Approve

@@ -4,10 +4,6 @@ on:
   issue_comment:
     types: [created]
 
-env:
-  PR_NUMBER: ${{ github.event.number }}
-  REPO: ${{ github.repository }}
-
 jobs:
   auto-merge:
     name: Auto Merge PR
@@ -32,14 +28,20 @@ jobs:
         id: comment-branch
 
       - name: Set PR_HEAD_REF
-        run: echo "PR_HEAD_REF=${{ steps.comment-branch.outputs.head_ref }}" >> $GITHUB_ENV
-        
+        run: |
+          echo "PR_HEAD_REF=${{ steps.comment-branch.outputs.head_ref }}" >> $GITHUB_ENV
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "ORG_NAME=${{ github.repository_owner }}" >> $GITHUB_ENV
+          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+          echo "RUN_ID=${{ github.run_id }}" >> $GITHUB_ENV
+          echo "LAST_COMMIT=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+
       - name: Check PR Approval by Bot
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo "Checking approvals for PR: PR_HEAD_REF..."
-          if gh pr view $PR_HEAD_REF --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == "mergem8")] | length' | grep -qw "1"; then
+          echo "Checking approvals for PR: $PR_HEAD_REF..."
+          if gh pr view $PR_HEAD_REF --repo $ORG_NAME/$REPO --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == "mergem8")] | length' | grep -qw "1"; then
             echo "✅ PR is approved by the bot."
             echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
           else
@@ -53,5 +55,5 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           echo "Merging PR #${{ env.PR_NUMBER }}..."
-          gh pr merge --admin --squash --delete-branch ${{ env.PR_NUMBER }} || echo "⚠️ Auto-merge failed. Check branch protections."
+          gh pr merge --repo $ORG_NAME/$REPO --admin --squash --delete-branch $PR_HEAD_REF|| echo "⚠️ Auto-merge failed. Check branch protections."
           echo "✅ PR #${{ env.PR_NUMBER }} merged successfully!"

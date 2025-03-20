@@ -12,10 +12,9 @@ jobs:
   auto-merge:
     name: Auto Merge PR
     runs-on: ubuntu-latest
-    if: | 
+    if: |
       github.event.issue.pull_request && 
-      github.event.comment.body == 'merge me' &&
-      github.event.label.name == 'emergency'
+      github.event.comment.body == 'merge me'
     steps:
 
       - name: Get GitHub App Token

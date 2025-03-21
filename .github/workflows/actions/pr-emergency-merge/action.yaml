@@ -38,11 +38,7 @@ runs:
           echo "HAS_EMERGENCY_LABEL=true" >> $GITHUB_ENV
         else
           echo "❌ PR does NOT have the 'emergency' label. Exiting."
-          cat <<EOF > comment.txt
-          Hey @$COMMENT_AUTHOR!
-          ❌ PR does NOT have the "emergency" label
-          EOF
-          gh pr comment --body-file comment.txt --repo $REPO $PR_HEAD_REF
+          gh pr comment --body $'Hey @${{ github.actor }}!\n❌ PR does NOT have the "emergency" label' --repo $REPO $PR_HEAD_REF
           exit 0
         fi
 
@@ -58,11 +54,7 @@ runs:
           echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
         else
           echo "❌ PR is NOT approved by the bot. Exiting."
-          cat <<EOF > comment.txt
-          Hey @$COMMENT_AUTHOR!
-          ❌ PR is NOT approved by the bot
-          EOF
-          gh pr comment --body-file comment.txt --repo $REPO $PR_HEAD_REF
+          gh pr comment --body $'Hey @${{ github.actor }}!\n❌ PR is NOT approved by the bot' --repo $REPO $PR_HEAD_REF
           exit 0
         fi
 
@@ -73,4 +65,4 @@ runs:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
         gh pr merge --repo $REPO --admin --squash --delete-branch $PR_HEAD_REF || echo "⚠️ Auto-merge failed. Check branch protections."
-        echo "✅ PR from branch: '$'PR_HEAD_REF merged successfully!"
+        echo "✅ PR merged successfully!"

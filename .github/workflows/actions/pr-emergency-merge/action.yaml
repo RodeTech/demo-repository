@@ -26,7 +26,8 @@ runs:
       run: |
         echo "PR_HEAD_REF=${{ steps.comment-branch.outputs.head_ref }}" >> $GITHUB_ENV
         echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-        echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+        echo "PR_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
+        echo "PR_NUM=$${{ github.event.issue.number }}" >> $GITHUB_ENV
 
     - name: Check PR Labels
       shell: bash
@@ -34,7 +35,7 @@ runs:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
         echo "Checking labels for PR #${{ env.PR_NUMBER }}..."
-        if gh pr view $$PR_HEAD_REF --repo $REPO --json labels --jq '.labels[].name' | grep -qw "emergency"; then
+        if gh pr view $PR_HEAD_REF --repo $REPO --json labels --jq '.labels[].name' | grep -qw "emergency"; then
           echo "✅ PR has the 'emergency' label."
           echo "HAS_EMERGENCY_LABEL=true" >> $GITHUB_ENV
         else
@@ -48,7 +49,7 @@ runs:
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
-        echo "Checking approvals for PR: $PR_HEAD_REF..."
+        echo "Checking approvals for PR heads branch: $PR_HEAD_REF..."
         BOT_APPROVALS=$(gh pr view $PR_HEAD_REF --repo $REPO --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == "mergem8")] | length')
 
         if [[ "$BOT_APPROVALS" -gt 0 ]]; then
@@ -66,6 +67,6 @@ runs:
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
-        echo "Merging PR #${{ env.PR_NUMBER }}..."
+        echo "Merging PR head branch: $PR_HEAD_REF..."
         gh pr merge --repo $REPO --admin --squash --delete-branch $PR_HEAD_REF || echo "⚠️ Auto-merge failed. Check branch protections."
         echo "✅ PR #${{ env.PR_NUMBER }} merged successfully!"

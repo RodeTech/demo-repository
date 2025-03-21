@@ -26,7 +26,7 @@ runs:
       run: |
         echo "PR_HEAD_REF=${{ steps.comment-branch.outputs.head_ref }}" >> $GITHUB_ENV
         echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-        echo "PR_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
+        echo "COMMENT_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
         echo "PR_NUM=$${{ github.event.issue.number }}" >> $GITHUB_ENV
 
     - name: Check PR Labels
@@ -57,7 +57,7 @@ runs:
           echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
         else
           echo "❌ PR is NOT approved by the bot. Exiting."
-          gh pr comment --body "Hey @$PR_AUTHOR!\n❌ Your PR is NOT approved by the bot" --repo $REPO $PR_HEAD_REF
+          gh pr comment --body "Hey @$COMMENT_AUTHOR!\n\n❌ PR is NOT approved by the bot" --repo $REPO $PR_HEAD_REF
           exit 0
         fi
 
@@ -69,4 +69,4 @@ runs:
       run: |
         echo "Merging PR head branch: $PR_HEAD_REF..."
         gh pr merge --repo $REPO --admin --squash --delete-branch $PR_HEAD_REF || echo "⚠️ Auto-merge failed. Check branch protections."
-        echo "✅ PR #${{ env.PR_NUMBER }} merged successfully!"
+        echo "✅ PR #${{ env.PR_NUM }} merged successfully!"

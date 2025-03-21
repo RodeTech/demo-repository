@@ -26,7 +26,7 @@ runs:
       run: |
         echo "PR_HEAD_REF=${{ steps.comment-branch.outputs.head_ref }}" >> $GITHUB_ENV
         echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
-        echo "COMMENT_AUTHOR=${{ github.actor }}" >> $GITHUB_ENV
+        echo "APP_NAME=${{ steps.app-token.outputs.app-slug }}" >> $GITHUB_ENV
 
     - name: Check PR Labels
       shell: bash

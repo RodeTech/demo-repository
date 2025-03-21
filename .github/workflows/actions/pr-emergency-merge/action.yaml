@@ -28,6 +28,20 @@ runs:
         echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
         echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
 
+    - name: Check PR Labels
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      run: |
+        echo "Checking labels for PR #${{ env.PR_NUMBER }}..."
+        if gh pr view $$PR_HEAD_REF --repo $REPO --json labels --jq '.labels[].name' | grep -qw "emergency"; then
+          echo "✅ PR has the 'emergency' label."
+          echo "HAS_EMERGENCY_LABEL=true" >> $GITHUB_ENV
+        else
+          echo "❌ PR does NOT have the 'emergency' label. Exiting."
+          gh pr comment --body "❌ PR does NOT have the 'emergency' label" --repo $REPO $PR_HEAD_REF
+          exit 0
+        fi
+        
     - name: Check PR Approval by Bot
       shell: bash
       env:
@@ -40,14 +54,14 @@ runs:
           echo "✅ PR is approved by the bot ($BOT_APPROVALS approvals)."
           echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
         else
-          echo "Hey @$PR_AUTHOR!\n❌ This PR is NOT approved by the bot. Exiting."
-          gh pr comment --body "❌ PR is NOT approved by the bot" --repo $REPO $PR_HEAD_REF
+          echo "❌ PR is NOT approved by the bot. Exiting."
+          gh pr comment --body "Hey @$PR_AUTHOR!\n❌ Your PR is NOT approved by the bot" --repo $REPO $PR_HEAD_REF
           exit 0
         fi
 
     - name: Merge the PR
       shell: bash
-      if: env.APPROVED_BY_BOT == 'true'
+      if: env.HAS_EMERGENCY_LABEL == 'true' && env.APPROVED_BY_BOT == 'true'
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |

@@ -38,7 +38,7 @@ runs:
           echo "HAS_EMERGENCY_LABEL=true" >> $GITHUB_ENV
         else
           echo "❌ PR does NOT have the 'emergency' label. Exiting."
-          gh pr comment --body $"Hey @$COMMENT_AUTHOR!\n❌ PR does NOT have the 'emergency' label" --repo $REPO $PR_HEAD_REF
+          gh pr comment --body $'Hey @$COMMENT_AUTHOR!\n❌ PR does NOT have the "emergency" label' --repo $REPO $PR_HEAD_REF
           exit 0
         fi
 
@@ -54,7 +54,7 @@ runs:
           echo "APPROVED_BY_BOT=true" >> $GITHUB_ENV
         else
           echo "❌ PR is NOT approved by the bot. Exiting."
-          gh pr comment --body $"Hey @$COMMENT_AUTHOR!\n❌ PR is NOT approved by the bot" --repo $REPO $PR_HEAD_REF
+          gh pr comment --body $'Hey @$COMMENT_AUTHOR!\n❌ PR is NOT approved by the bot' --repo $REPO $PR_HEAD_REF
           exit 0
         fi
 

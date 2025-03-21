@@ -15,8 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event.issue.pull_request && 
-      github.event.comment.body == 'merge me' &&
-      github.event.label.name == 'emergency'
+      github.event.comment.body == '/merge me'
     steps:
 
       - name: Checkout branch

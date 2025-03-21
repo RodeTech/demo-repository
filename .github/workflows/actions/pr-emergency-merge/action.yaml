@@ -47,7 +47,7 @@ runs:
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
-        BOT_APPROVALS=$(gh pr view $PR_HEAD_REF --repo $REPO --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == "mergem8")] | length')
+        BOT_APPROVALS=$(gh pr view $PR_HEAD_REF --repo $REPO --json reviews --jq '[.reviews[] | select(.state == "APPROVED" and .author.login == '"$APP_NAME"')] | length')
 
         if [[ "$BOT_APPROVALS" -gt 0 ]]; then
           echo "✅ PR is approved by the bot ($BOT_APPROVALS approvals)."

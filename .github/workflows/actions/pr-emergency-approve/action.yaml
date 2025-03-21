@@ -28,7 +28,6 @@ runs:
         echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
         echo "RUN_ID=${{ github.run_id }}" >> $GITHUB_ENV
         echo "LAST_COMMIT=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
-        echo "APP_NAME=${{ steps.app-token.outputs.app-slug }}" >> $GITHUB_ENV
 
     - name: Fetch Team Members of Specific Team
       shell: bash

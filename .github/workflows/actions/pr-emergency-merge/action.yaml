@@ -40,7 +40,6 @@ runs:
           echo "❌ PR does NOT have the 'emergency' label. Exiting."
           cat <<EOF > comment.txt
           Hey @$COMMENT_AUTHOR!
-
           ❌ PR does NOT have the "emergency" label
           EOF
           gh pr comment --body-file comment.txt --repo $REPO $PR_HEAD_REF
@@ -61,7 +60,6 @@ runs:
           echo "❌ PR is NOT approved by the bot. Exiting."
           cat <<EOF > comment.txt
           Hey @$COMMENT_AUTHOR!
-
           ❌ PR is NOT approved by the bot
           EOF
           gh pr comment --body-file comment.txt --repo $REPO $PR_HEAD_REF

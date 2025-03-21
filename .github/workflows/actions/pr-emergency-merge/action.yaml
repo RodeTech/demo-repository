@@ -29,6 +29,7 @@ runs:
         echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
 
     - name: Check PR Labels
+      shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
       run: |
@@ -41,7 +42,7 @@ runs:
           gh pr comment --body "❌ PR does NOT have the 'emergency' label" --repo $REPO $PR_HEAD_REF
           exit 0
         fi
-        
+
     - name: Check PR Approval by Bot
       shell: bash
       env:

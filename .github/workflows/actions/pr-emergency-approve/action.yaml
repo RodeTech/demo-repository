@@ -33,43 +33,43 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        TEAM_NAMES: ${{ inputs.BYPASS_TEAMS }}
-        run: |
-          echo "Fetching members of teams: $TEAM_NAMES"
-      
-          # Convert comma-separated string to array
-          IFS=',' read -ra TEAMS <<< "$TEAM_NAMES"
-      
-          AUTHOR_IS_MEMBER=false
-      
-          for TEAM in "${TEAMS[@]}"; do
-            TEAM=$(echo "$TEAM" | xargs)
-            echo "Checking team: $TEAM"
-
-            TEAM_MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM/members --jq 'map(.login) | join(" ")' 2>/dev/null || echo "")
-            
-            if [[ -z "$TEAM_MEMBERS" ]]; then
-              echo "⚠️ Could not fetch members for $TEAM or team is empty"
-              continue
-            fi
-      
-            echo "Members of $TEAM: $TEAM_MEMBERS"
-      
-            if echo "$TEAM_MEMBERS" | grep -wq "$PR_AUTHOR"; then
-              echo "✅ PR Author $PR_AUTHOR is a member of $TEAM!"
-              AUTHOR_IS_MEMBER=true
-              break
-            else
-              echo "❌ PR Author $PR_AUTHOR is NOT a member of $TEAM"
-            fi
-          done
-      
-          if [ "$AUTHOR_IS_MEMBER" = true ]; then
-            echo "AUTHOR_IS_BYPASS_MEMBER=true" >> $GITHUB_ENV
-          else
-            echo "AUTHOR_IS_BYPASS_MEMBER=false" >> $GITHUB_ENV
-            exit 0
+        TEAM_NAME: ${{ inputs.BYPASS_TEAMS }}
+      run: |
+        echo "Fetching members of teams: $TEAM_NAMES"
+    
+        # Convert comma-separated string to array
+        IFS=',' read -ra TEAMS <<< "$TEAM_NAMES"
+    
+        AUTHOR_IS_MEMBER=false
+    
+        for TEAM in "${TEAMS[@]}"; do
+          TEAM=$(echo "$TEAM" | xargs)  # Trim whitespace
+          echo "Checking team: $TEAM"
+    
+          TEAM_MEMBERS=$(gh api orgs/$ORG_NAME/teams/$TEAM/members --jq 'map(.login) | join(" ")' 2>/dev/null || echo "")
+          
+          if [[ -z "$TEAM_MEMBERS" ]]; then
+            echo "⚠️ Could not fetch members for $TEAM or team is empty"
+            continue
           fi
+    
+          echo "Members of $TEAM: $TEAM_MEMBERS"
+    
+          if echo "$TEAM_MEMBERS" | grep -wq "$PR_AUTHOR"; then
+            echo "✅ PR Author $PR_AUTHOR is a member of $TEAM!"
+            AUTHOR_IS_MEMBER=true
+            break
+          else
+            echo "❌ PR Author $PR_AUTHOR is NOT a member of $TEAM"
+          fi
+        done
+    
+        if [ "$AUTHOR_IS_MEMBER" = true ]; then
+          echo "AUTHOR_IS_BYPASS_MEMBER=true" >> $GITHUB_ENV
+        else
+          echo "AUTHOR_IS_BYPASS_MEMBER=false" >> $GITHUB_ENV
+          exit 0
+        fi
 
     - name: Wait for All Checks to Complete (Excluding Current Job)
       shell: bash

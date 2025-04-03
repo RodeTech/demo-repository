@@ -24,6 +24,6 @@ jobs:
       - name: Emergency Approve
         uses: ./.github/workflows/actions/pr-emergency-approve
         with:
-          BYPASS_TEAMS: bot, test-team
+          BYPASS_TEAMS: ride0,ride1
           GHAPP_ID: 1184072
           GHAPP_SSH_KEY: ${{ secrets.MERGEMATE_KEY }}

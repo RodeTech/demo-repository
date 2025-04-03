@@ -33,7 +33,7 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        TEAM_NAME: ${{ inputs.BYPASS_TEAMS }}
+        TEAM_NAMES: ${{ inputs.BYPASS_TEAMS }}
       run: |
         echo "Fetching members of teams: $TEAM_NAMES"
     
